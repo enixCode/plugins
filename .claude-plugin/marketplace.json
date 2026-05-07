@@ -22,6 +22,22 @@
       },
       "homepage": "https://github.com/enixCode/light-process",
       "keywords": ["workflow", "dag", "docker", "orchestration", "light-run", "light-runner"]
+    },
+    {
+      "name": "ulab",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/enixCode/ulab.git",
+        "path": "plugins/ulab",
+        "ref": "main"
+      },
+      "description": "Scaffolde un lab d'apprentissage prêt à l'emploi sur n'importe quel sujet. Choisit le runtime adapté (docker compose, devcontainer, venv, dossier nu), génère un parcours pédagogique progressif avec sources citées, et fournit des solutions cachées.",
+      "author": {
+        "name": "enixcode",
+        "email": "enixcode@proton.me"
+      },
+      "homepage": "https://github.com/enixCode/ulab",
+      "keywords": ["lab", "learning", "scaffold", "tutorial", "ctf", "training"]
     }
   ]
 }

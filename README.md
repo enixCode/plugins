@@ -19,6 +19,7 @@ Puis installer un plugin :
 | Nom | Description |
 |---|---|
 | [light-process](https://github.com/enixCode/light-process) | Skills pour light-process : moteur DAG orchestrant du code dans des conteneurs Docker via light-run. |
+| [ulab](https://github.com/enixCode/ulab) | Scaffolde un lab d'apprentissage prêt à l'emploi sur n'importe quel sujet (runtime adapté, parcours pédagogique avec sources, solutions cachées). |
 
 ## Mises à jour
 
