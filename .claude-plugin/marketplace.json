@@ -1,5 +1,5 @@
 {
-  "name": "enix-public",
+  "name": "enix",
   "owner": {
     "name": "enixCode",
     "email": "enixcode@proton.me"
@@ -10,17 +10,18 @@
   },
   "plugins": [
     {
-      "name": "secret-mask",
+      "name": "light-process",
       "source": {
         "source": "url",
-        "url": "https://github.com/enixCode/secret-mask.git"
+        "url": "https://github.com/enixCode/light-process.git"
       },
-      "description": "Masks secret values from Claude Code's view. Real files stay untouched.",
-      "version": "0.6.0",
+      "description": "Skills for working with light-process: DAG workflow engine that orchestrates code in Docker containers via light-run.",
       "author": {
-        "name": "enixCode"
+        "name": "enixCode",
+        "email": "enixcode@proton.me"
       },
-      "keywords": ["security", "secrets", "masking", "env", "hooks"]
+      "homepage": "https://github.com/enixCode/light-process",
+      "keywords": ["workflow", "dag", "docker", "orchestration", "light-run", "light-runner"]
     }
   ]
 }
