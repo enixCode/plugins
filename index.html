@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>enix / plugins — a marketplace for Claude Code</title>
+<title>enix / plugins - a marketplace for Claude Code</title>
 <meta name="description" content="A small, opinionated marketplace of Claude Code plugins by enixCode. Install with /plugin marketplace add enixCode/plugins." />
 <link rel="canonical" href="https://enixcode.github.io/plugins/" />
 <meta name="theme-color" content="#f8f9fa" media="(prefers-color-scheme: light)" />
@@ -743,7 +743,6 @@ footer a:hover { color: var(--hot); }
   </div>
   <nav class="right" aria-label="Marketplace meta">
     <span><b data-count></b> plugins</span>
-    <span>MIT</span>
     <a href="https://github.com/enixCode/plugins" target="_blank" rel="noopener">GitHub ↗</a>
     <button class="view-toggle" id="view-toggle" aria-label="Switch layout" type="button">
       <span class="opt" data-view-set="detail">detail</span>
@@ -835,7 +834,7 @@ footer a:hover { color: var(--hot); }
 })();
 
 // ────────────────────────────────────────────────────────────────────────
-// Plugins config — only minimum site-specific fields here.
+// Plugins config - only minimum site-specific fields here.
 //
 // At runtime, two fetches enrich each entry:
 //   1. plugin.json (raw)        -> name, version, description, license
@@ -854,7 +853,7 @@ const plugins = [
     pluginJsonPath: '.claude-plugin/plugin.json',
     kind: { label: 'plugin + cli', tone: 'full', title: 'Plugin + standalone CLI/server you also install via npm' },
     setup: {
-      summary: 'Setup the engine — required to run workflows',
+      summary: 'Setup the engine - required to run workflows',
       noteTop: 'The plugin gives Claude skills. To actually execute workflows, install the npm packages and start the runner.',
       commands: [
         'npm install -g light-process @enixcode/light-run',
@@ -873,7 +872,7 @@ const plugins = [
     repo: 'enixCode/ulab',
     branch: 'main',
     pluginJsonPath: 'plugins/ulab/.claude-plugin/plugin.json',
-    kind: { label: 'plugin', tone: 'solo', title: 'Plugin only — no separate install required' },
+    kind: { label: 'plugin', tone: 'solo', title: 'Plugin only - no separate install required' },
     setup: null,
     staticSpecs: null,
     docsUrl: null
@@ -936,7 +935,7 @@ const fetchPluginManifest = async (p) => {
 
 // ────────────────────────────────────────────────────────────────────────
 // Auto-discovery: scan the plugin's git tree to list skills/commands/agents.
-// Uses api.github.com (rate-limited 60/h/IP unauth) — cached 1h client-side.
+// Uses api.github.com (rate-limited 60/h/IP unauth) - cached 1h client-side.
 // Failure mode: returns null, render goes degraded silently.
 // ────────────────────────────────────────────────────────────────────────
 const fetchPluginTree = async (p) => {
