@@ -13,6 +13,8 @@
 (() => {
   const t = localStorage.getItem('theme');
   if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+  const v = localStorage.getItem('view');
+  if (v === 'list' || v === 'grid') document.documentElement.setAttribute('data-view', v);
 })();
 </script>
 
@@ -180,6 +182,111 @@ main { position: relative; z-index: 1; }
   color: var(--mark-fg);
 }
 .theme-toggle:hover .opt:not(.active) { color: var(--mark-fg); }
+
+.view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  padding: 4px 6px;
+  font-family: 'Archivo Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+  min-height: 28px;
+}
+.view-toggle:hover { background: var(--mark-bg); color: var(--mark-fg); }
+.view-toggle .opt {
+  padding: 4px 8px;
+  opacity: 0.4;
+  transition: opacity 140ms ease;
+}
+.view-toggle .opt.active {
+  opacity: 1;
+  background: var(--mark-bg);
+  color: var(--mark-fg);
+}
+.view-toggle:hover .opt:not(.active) { color: var(--mark-fg); }
+
+/* ────────── view modes ────────── */
+
+/* GRID: 2 cards per row max, all info kept */
+:root[data-view="grid"] #catalogue {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+:root[data-view="grid"] .plugin {
+  padding: 28px 24px;
+  border-right: 1px solid var(--rule);
+}
+:root[data-view="grid"] .plugin:nth-child(even) {
+  background: transparent;
+}
+:root[data-view="grid"] .plugin .gutter .num {
+  font-size: 56px;
+}
+:root[data-view="grid"] .plugin h2 {
+  font-size: clamp(28px, 3vw, 40px);
+}
+
+/* LIST: compact one-row-per-plugin */
+:root[data-view="list"] .plugin {
+  padding: 12px 28px;
+  grid-template-columns: 50px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+:root[data-view="list"] .plugin .gutter .num {
+  font-size: 24px;
+  letter-spacing: -0.02em;
+}
+:root[data-view="list"] .plugin .gutter .num small {
+  display: none;
+}
+:root[data-view="list"] .plugin .body {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+:root[data-view="list"] .plugin h2 {
+  font-size: 22px;
+  line-height: 1;
+}
+:root[data-view="list"] .plugin .desc,
+:root[data-view="list"] .plugin .install,
+:root[data-view="list"] .plugin details.setup,
+:root[data-view="list"] .plugin .specs {
+  display: none;
+}
+:root[data-view="list"] .plugin .metarow {
+  font-size: 10.5px;
+}
+:root[data-view="list"] .plugin .metarow .badge {
+  padding: 3px 8px;
+}
+:root[data-view="list"] .plugin .cta-row {
+  margin-left: auto;
+  padding-top: 0;
+  gap: 8px 16px;
+}
+:root[data-view="list"] .plugin .cta-row .primary {
+  padding: 8px 14px;
+  font-size: 11px;
+}
+:root[data-view="list"] .plugin .cta-row .secondary {
+  font-size: 11px;
+}
+
+@media (max-width: 720px) {
+  :root[data-view="grid"] #catalogue { grid-template-columns: 1fr; }
+  :root[data-view="list"] .plugin .cta-row { margin-left: 0; }
+}
 
 /* ────────── hero ────────── */
 .hero {
@@ -638,6 +745,11 @@ footer a:hover { color: var(--hot); }
     <span><b data-count></b> plugins</span>
     <span>MIT</span>
     <a href="https://github.com/enixCode/plugins" target="_blank" rel="noopener">GitHub ↗</a>
+    <button class="view-toggle" id="view-toggle" aria-label="Switch layout" type="button">
+      <span class="opt" data-view-set="detail">detail</span>
+      <span class="opt" data-view-set="list">list</span>
+      <span class="opt" data-view-set="grid">grid</span>
+    </button>
     <button class="theme-toggle" id="theme-toggle" aria-label="Switch theme" type="button">
       <span class="opt" data-theme-set="auto">auto</span>
       <span class="opt" data-theme-set="light">light</span>
@@ -723,12 +835,16 @@ footer a:hover { color: var(--hot); }
 })();
 
 // ────────────────────────────────────────────────────────────────────────
-// Plugins config — only site-specific fields here.
-// name, version, description, license come from each plugin's
-// .claude-plugin/plugin.json fetched at runtime. If the fetch fails
-// (404, repo private, network), the plugin is auto-flagged as pending.
+// Plugins config — only minimum site-specific fields here.
 //
-// To add a plugin: append a new entry below.
+// At runtime, two fetches enrich each entry:
+//   1. plugin.json (raw)        -> name, version, description, license
+//   2. git tree (api.github)    -> skills/, commands/, agents/ lists
+//
+// If a fetch fails, the card renders in degraded mode (no counts/lists,
+// but still shows kind + license + CTAs).  No visual error to the user.
+//
+// To add a plugin: append an entry below.
 // ────────────────────────────────────────────────────────────────────────
 const plugins = [
   {
@@ -737,19 +853,17 @@ const plugins = [
     branch: 'main',
     pluginJsonPath: '.claude-plugin/plugin.json',
     kind: { label: 'plugin + cli', tone: 'full', title: 'Plugin + standalone CLI/server you also install via npm' },
-    metaSummary: '<b>5</b> skills',
     setup: {
       summary: 'Setup the engine — required to run workflows',
-      noteTop: 'The plugin gives Claude five skills. To actually execute workflows, install the npm packages and start the runner.',
+      noteTop: 'The plugin gives Claude skills. To actually execute workflows, install the npm packages and start the runner.',
       commands: [
         'npm install -g light-process @enixcode/light-run',
         'light serve'
       ],
       noteBottom: 'Requires Node 20+ and Docker on the host running light-run.'
     },
-    specs: {
-      Skills: ['context', 'create-workflow', 'add-node', 'setup-light-run', 'remote'],
-      Stack:  'light-process · light-run · light-runner · Docker',
+    staticSpecs: {
+      Stack:   'light-process · light-run · light-runner · Docker',
       Runtime: 'Node 20+ · ESM · TypeScript'
     },
     docsUrl: 'https://enixcode.github.io/light-process/'
@@ -760,36 +874,54 @@ const plugins = [
     branch: 'main',
     pluginJsonPath: 'plugins/ulab/.claude-plugin/plugin.json',
     kind: { label: 'plugin', tone: 'solo', title: 'Plugin only — no separate install required' },
-    metaSummary: '<b>3</b> skills · <b>2</b> agents · <b>5</b> commands',
     setup: null,
-    specs: {
-      Commands: ['/ulab:new', '/ulab:list', '/ulab:learner', '/ulab:reset', '/ulab:publish'],
-      Skills:   ['lab-scaffolder', 'lab-learner', 'lab-debug'],
-      Agents:   ['lab-researcher', 'lab-builder']
-    },
+    staticSpecs: null,
     docsUrl: null
   }
 ];
 
 // ────────────────────────────────────────────────────────────────────────
-// Fetch each plugin's manifest from raw.githubusercontent.com.
-// 200 -> merge name/version/description/license, mark live.
-// Anything else (404, network, CORS, parse) -> mark pending.
+// Cache helpers (localStorage, 1h TTL by default)
+// ────────────────────────────────────────────────────────────────────────
+const ONE_HOUR = 60 * 60 * 1000;
+const cacheGet = (key) => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const { value, expires } = JSON.parse(raw);
+    if (expires < Date.now()) { localStorage.removeItem(key); return null; }
+    return value;
+  } catch { return null; }
+};
+const cacheSet = (key, value, ttl = ONE_HOUR) => {
+  try { localStorage.setItem(key, JSON.stringify({ value, expires: Date.now() + ttl })); } catch {}
+};
+
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const pluginPrefix = (p) => p.pluginJsonPath.replace(/\.claude-plugin\/plugin\.json$/, '');
+
+// ────────────────────────────────────────────────────────────────────────
+// Fetch plugin.json from raw.githubusercontent.com
+// 200 -> live. Anything else -> pending.
 // ────────────────────────────────────────────────────────────────────────
 const fetchPluginManifest = async (p) => {
-  const rawUrl = `https://raw.githubusercontent.com/${p.repo}/${p.branch}/${p.pluginJsonPath}`;
+  const cacheKey = `manifest:${p.repo}@${p.branch}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return { ...p, ...cached };
+  const url = `https://raw.githubusercontent.com/${p.repo}/${p.branch}/${p.pluginJsonPath}`;
   try {
-    const res = await fetch(rawUrl, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error();
     const m = await res.json();
-    return {
-      ...p,
+    const data = {
       pending: false,
       name: m.name || p.id,
       version: m.version || null,
       description: m.description || '',
       license: m.license || 'unknown'
     };
+    cacheSet(cacheKey, data);
+    return { ...p, ...data };
   } catch {
     return {
       ...p,
@@ -799,6 +931,41 @@ const fetchPluginManifest = async (p) => {
       description: '',
       license: 'unknown'
     };
+  }
+};
+
+// ────────────────────────────────────────────────────────────────────────
+// Auto-discovery: scan the plugin's git tree to list skills/commands/agents.
+// Uses api.github.com (rate-limited 60/h/IP unauth) — cached 1h client-side.
+// Failure mode: returns null, render goes degraded silently.
+// ────────────────────────────────────────────────────────────────────────
+const fetchPluginTree = async (p) => {
+  const cacheKey = `tree:${p.repo}@${p.branch}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+  const url = `https://api.github.com/repos/${p.repo}/git/trees/${p.branch}?recursive=1`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error();
+    const json = await res.json();
+    const prefix = pluginPrefix(p);
+    const skillRe = new RegExp(`^${escapeRegex(prefix)}skills/([^/]+)/SKILL\\.md$`);
+    const cmdRe   = new RegExp(`^${escapeRegex(prefix)}commands/([^/]+)\\.md$`);
+    const agentRe = new RegExp(`^${escapeRegex(prefix)}agents/([^/]+)\\.md$`);
+    const skills = [], commands = [], agents = [];
+    for (const node of (json.tree || [])) {
+      if (node.type !== 'blob') continue;
+      let m;
+      if ((m = skillRe.exec(node.path)))  skills.push(m[1]);
+      else if ((m = cmdRe.exec(node.path))) commands.push(m[1]);
+      else if ((m = agentRe.exec(node.path))) agents.push(m[1]);
+    }
+    skills.sort(); commands.sort(); agents.sort();
+    const data = { skills, commands, agents };
+    cacheSet(cacheKey, data);
+    return data;
+  } catch {
+    return null;
   }
 };
 
@@ -838,11 +1005,17 @@ const renderSpecValue = (v) => {
   return esc(v);
 };
 
-const renderSpecs = (specs) => {
-  const rows = Object.entries(specs)
-    .map(([k, v]) => `<dt>${esc(k)}</dt><dd>${renderSpecValue(v)}</dd>`)
-    .join('');
-  return `<dl class="specs">${rows}</dl>`;
+const renderSpecs = (p) => {
+  const rows = [];
+  if (p.skills?.length)   rows.push(['Skills', p.skills]);
+  if (p.commands?.length) rows.push(['Commands', p.commands.map(c => `/${p.id}:${c}`)]);
+  if (p.agents?.length)   rows.push(['Agents', p.agents]);
+  if (p.staticSpecs) {
+    for (const [k, v] of Object.entries(p.staticSpecs)) rows.push([k, v]);
+  }
+  if (!rows.length) return '';
+  const html = rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${renderSpecValue(v)}</dd>`).join('');
+  return `<dl class="specs">${html}</dl>`;
 };
 
 const renderCtas = (c) => {
@@ -862,9 +1035,14 @@ const renderMetarow = (p) => {
     parts.push(`<span class="sep">·</span>`);
   }
   parts.push(`<span>${esc(p.license)}</span>`);
-  if (!p.pending && p.metaSummary) {
+  // Counts derived from auto-discovery; silent if unavailable
+  const counts = [];
+  if (p.skills?.length)   counts.push(`<b>${p.skills.length}</b> skills`);
+  if (p.commands?.length) counts.push(`<b>${p.commands.length}</b> commands`);
+  if (p.agents?.length)   counts.push(`<b>${p.agents.length}</b> agents`);
+  if (counts.length) {
     parts.push(`<span class="sep">·</span>`);
-    parts.push(`<span>${p.metaSummary}</span>`);
+    parts.push(`<span>${counts.join(' · ')}</span>`);
   }
   return `<div class="metarow">${parts.join('')}</div>`;
 };
@@ -891,7 +1069,7 @@ const renderPlugin = (p, i) => {
           <button class="copy-btn" data-copy="${esc(installCmd)}" data-host="${slug}-install" type="button">copy</button>
         </div>
         ${renderSetup({ ...p, id: slug })}
-        ${renderSpecs(p.specs)}
+        ${renderSpecs(p)}
         ${renderCtas(ctas)}
       </div>
     </article>`;
@@ -928,16 +1106,50 @@ const attachCopyListeners = () => {
 };
 
 // ────────────────────────────────────────────────────────────────────────
-// Init: fetch manifests, render cards, attach copy listeners
+// Init: fetch manifests + trees in parallel, render cards, attach listeners
 // ────────────────────────────────────────────────────────────────────────
 (async () => {
-  const enriched = await Promise.all(plugins.map(fetchPluginManifest));
+  const enriched = await Promise.all(plugins.map(async (p) => {
+    const manifest = await fetchPluginManifest(p);
+    if (manifest.pending) return manifest; // skip tree if repo unreachable
+    const tree = await fetchPluginTree(p);  // null if API fails or rate-limited
+    return tree ? { ...manifest, ...tree } : manifest;
+  }));
   const mount = document.getElementById('catalogue');
   mount.innerHTML = enriched.map(renderPlugin).join('');
   document.querySelectorAll('[data-count]').forEach((el) => {
     el.textContent = num2(enriched.length);
   });
   attachCopyListeners();
+})();
+
+// ────────────────────────────────────────────────────────────────────────
+// View toggle (detail / list / grid)
+// ────────────────────────────────────────────────────────────────────────
+(() => {
+  const root = document.documentElement;
+  const toggle = document.getElementById('view-toggle');
+  if (!toggle) return;
+  const opts = toggle.querySelectorAll('[data-view-set]');
+  const sync = () => {
+    const stored = localStorage.getItem('view') || 'detail';
+    opts.forEach((o) => o.classList.toggle('active', o.dataset.viewSet === stored));
+  };
+  const apply = (mode) => {
+    if (mode === 'detail') {
+      localStorage.removeItem('view');
+      root.removeAttribute('data-view');
+    } else {
+      localStorage.setItem('view', mode);
+      root.setAttribute('data-view', mode);
+    }
+    sync();
+  };
+  toggle.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-view-set]');
+    if (target) apply(target.dataset.viewSet);
+  });
+  sync();
 })();
 </script>
 
