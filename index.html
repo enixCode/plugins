@@ -180,19 +180,18 @@ main { position: relative; z-index: 1; }
   transition: background 140ms ease, color 140ms ease;
   min-height: 28px;
 }
-.theme-toggle:hover { background: var(--mark-bg); color: var(--mark-fg); }
 .theme-toggle .opt {
   padding: 4px 8px;
   border-radius: 0;
   opacity: 0.4;
-  transition: opacity 140ms ease;
+  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
 }
 .theme-toggle .opt.active {
   opacity: 1;
   background: var(--mark-bg);
   color: var(--mark-fg);
 }
-.theme-toggle:hover .opt:not(.active) { color: var(--mark-fg); }
+.theme-toggle .opt:not(.active):hover { opacity: 1; }
 
 .view-toggle {
   display: inline-flex;
@@ -211,18 +210,17 @@ main { position: relative; z-index: 1; }
   transition: background 140ms ease, color 140ms ease;
   min-height: 28px;
 }
-.view-toggle:hover { background: var(--mark-bg); color: var(--mark-fg); }
 .view-toggle .opt {
   padding: 4px 8px;
   opacity: 0.4;
-  transition: opacity 140ms ease;
+  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
 }
 .view-toggle .opt.active {
   opacity: 1;
   background: var(--mark-bg);
   color: var(--mark-fg);
 }
-.view-toggle:hover .opt:not(.active) { color: var(--mark-fg); }
+.view-toggle .opt:not(.active):hover { opacity: 1; }
 
 /* ────────── view modes ────────── */
 
