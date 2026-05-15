@@ -67,6 +67,17 @@
       "license": "https://opensource.org/licenses/MIT",
       "url": "https://github.com/enixCode/ulab",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "name": "rtk-plugin",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Linux, macOS, Windows",
+      "description": "Transparent token compression for Claude Code via RTK. Wraps shell tool calls to return 60-90% fewer tokens, automatically.",
+      "softwareVersion": "0.1.0",
+      "license": "https://opensource.org/licenses/MIT",
+      "url": "https://github.com/enixCode/rtk-plugin",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
     }
   ]
 }
@@ -875,6 +886,19 @@ const plugins = [
     kind: { label: 'plugin', tone: 'solo', title: 'Plugin only - no separate install required' },
     setup: null,
     staticSpecs: null,
+    docsUrl: null
+  },
+  {
+    id: 'rtk-plugin',
+    repo: 'enixCode/rtk-plugin',
+    branch: 'main',
+    pluginJsonPath: '.claude-plugin/plugin.json',
+    kind: { label: 'plugin + runtime', tone: 'full', title: 'Plugin + RTK binary auto-downloaded at SessionStart (requires Node 18+ and bash)' },
+    setup: null,
+    staticSpecs: {
+      Runtime: 'Node 18+ · bash',
+      Stack:   'RTK · SessionStart · PreToolUse(Bash)'
+    },
     docsUrl: null
   }
 ];
