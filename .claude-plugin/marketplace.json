@@ -38,6 +38,20 @@
       },
       "homepage": "https://github.com/enixCode/ulab",
       "keywords": ["lab", "learning", "scaffold", "tutorial", "ctf", "training"]
+    },
+    {
+      "name": "rtk-plugin",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/enixCode/rtk-plugin.git"
+      },
+      "description": "Transparent token compression for Claude Code via RTK",
+      "author": {
+        "name": "enixCode",
+        "email": "enixcode@proton.me"
+      },
+      "homepage": "https://github.com/enixCode/rtk-plugin",
+      "keywords": ["tokens", "compression", "rtk", "performance"]
     }
   ]
 }
