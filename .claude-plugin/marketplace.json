@@ -52,6 +52,25 @@
       },
       "homepage": "https://github.com/enixCode/rtk-plugin",
       "keywords": ["tokens", "compression", "rtk", "performance"]
+    },
+    {
+      "name": "mattpocock",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/mattpocock/skills.git",
+        "path": "skills/productivity",
+        "ref": "main",
+        "sha": "c55ee46073ed923f86ce59a5eb3b6d895095d1b7"
+      },
+      "description": "Sélection des skills de Matt Pocock : grill-me (interrogatoire d'un plan), handoff (document de passation), teach (apprentissage multi-sessions).",
+      "skills": ["./grill-me", "./grilling", "./handoff", "./teach"],
+      "author": {
+        "name": "Matt Pocock",
+        "url": "https://www.aihero.dev"
+      },
+      "homepage": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "keywords": ["grilling", "handoff", "teaching", "productivity"]
     }
   ]
 }
